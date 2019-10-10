@@ -14,6 +14,7 @@ module Autodoc
     def write
       write_toc if Autodoc.configuration.toc
       write_toc_html if Autodoc.configuration.toc_html
+      write_swagger_block if Autodoc.configuration.swagger_block
 
       write_documents
     end
@@ -43,6 +44,14 @@ module Autodoc
 
     def render_toc_html
       ERB.new(Autodoc.configuration.toc_html_template, nil, "-").result(binding)
+    end
+
+    def write_swagger_block
+      @table.each do |pathname, documents|
+        pathname = pathname.sub('doc', 'app/controllers/swagger').sub_ext('.rb')
+        pathname.parent.mkpath
+        pathname.open("w") {|file| file << documents.map(&:render_swagger_block).join("\n").rstrip + "\n" }
+      end
     end
 
     def toc_path

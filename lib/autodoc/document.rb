@@ -30,6 +30,10 @@ module Autodoc
       ERB.new(Autodoc.configuration.template, nil, "-").result(binding)
     end
 
+    def render_swagger_block
+      ERB.new(Autodoc.configuration.swagger_block_template, nil, "-").result(binding)
+    end
+
     def title
       "#{method} #{path}"
     end
@@ -144,6 +148,10 @@ module Autodoc
 
     def response_http_version
       response.header["HTTP_VERSION"] || "HTTP/1.1"
+    end
+
+    def response_content_type
+      response.header["Content-Type"]
     end
 
     def response_body_section

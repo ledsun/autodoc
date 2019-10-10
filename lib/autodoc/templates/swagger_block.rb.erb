@@ -1,0 +1,57 @@
+# frozen_string_literal: true
+
+class Swagger::<%= example.full_description.split(' ')[0] %>
+  include Swagger::Blocks
+
+  swagger_path '<%= request.path %>' do
+    operation :<%= method.downcase %> do
+      key :operationId, '<%= request.path.split('/').last %>'
+      key :summary, 'TODO: API_SUMMAY'
+      key :description, 'TODO: API_DESCRIPTION'
+      key :tags, ['TODO API_TAG']
+      <%# クエリパラメータを出力 %>
+      <% CGI::parse(request.query_string).each do |key, value| %>
+      parameter do
+        key :name, '<%= key %>'
+        key :in, 'query'
+        key :description, 'TODO: PARAMETER_DESCRIPTION'
+        key :required, true
+        schema do
+          key :type, 'string'
+        end
+        key :example, '<%= value.first %>'
+      end
+      <% end %>
+      <%# リクエストボディを出力 application/x-www-form-urlencoded にのみ対応 %>
+      <% unless request.body.eof? %>
+      request_body do
+        content :'<%= request.headers["Content-Type"] %>' do
+          schema do
+            key :type, 'object'
+            <% URI.decode_www_form(request.body.read).each do |key, value| %>
+            property :'<%= key %>' do
+              key :description, 'TODO: PARAMETER_DESCRIPTION'
+              key :type, 'string'
+            end
+            <% end %>
+          end
+        end
+        key :required, true
+      end
+      <% end %>
+      <%# レスポンスの出力 text/html にのみ対応 %>
+      response <%= response.code %> do
+        key :description, 'TODO: RESPONSE_DESCRIPTION'
+        content :'<%= response_content_type %>' do
+          schema do
+            key :type, 'string'
+            key :example, '<%= response.body.gsub("\n", '\n') %>'
+          end
+        end
+      end
+      response '500' do
+        key :description, '予期せぬエラー'
+      end
+    end
+  end
+end
